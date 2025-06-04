@@ -1,0 +1,508 @@
+---
+title: "Bike Share Analysis"
+author: "Chinonso"
+date: "2025-06-04"
+output: html_document
+---
+
+---
+title: "My Capstone Project on Bike Ride "
+author: "Chinonso"
+date: "2025-01-03"
+output: html_document
+---
+
+
+# Setting up my r environment and Loading packages
+```{r}
+getwd()
+```
+```{r}
+library(tidyverse)
+```
+```{r}
+library(ggplot2)
+library(janitor)
+```
+```{r}
+
+library(lubridate)
+library(readr)
+library(skimr)
+library(dplyr)
+library(tidyr)
+library(gt)
+library(farver)
+library(plotrix)
+library(tinytex)
+```
+# setting directory
+```
+setwd("C:/Users/cexsa/Documents/R/Project/bike-trip-dataset")
+```
+# assigning and importing dataset  
+```{r}
+dec_23 <- read.csv("202312-divvy-tripdata.csv")
+jan_24 <- read.csv("202401-divvy-tripdata.csv")
+feb_24 <- read.csv("202402-divvy-tripdata.csv")
+mar_24 <- read.csv("202403-divvy-tripdata.csv")
+apr_24 <- read.csv("202404-divvy-tripdata.csv")
+may_24 <- read.csv("202405-divvy-tripdata.csv")
+jun_24 <- read.csv("202406-divvy-tripdata.csv")
+jul_24 <- read.csv("202407-divvy-tripdata.csv")
+aug_24 <- read.csv("202408-divvy-tripdata.csv")
+sept_24 <- read.csv("202409-divvy-tripdata.csv")
+oct_24 <- read.csv("202410-divvy-tripdata.csv")
+nov_24 <- read.csv("202411-divvy-tripdata.csv")
+
+```
+checking for uniformity in column names
+```{r}
+colnames(dec_23)
+
+```
+```{r}
+colnames(jan_24)
+
+```
+
+```{r}
+colnames(feb_24)
+
+```
+
+```{r}
+colnames(mar_24)
+
+```
+```{r}
+colnames(apr_24)
+
+```
+```{r}
+colnames(may_24)
+
+```
+```{r}
+colnames(jun_24)
+
+```
+
+```{r}
+colnames(jul_24)
+
+```
+
+```{r}
+colnames(aug_24)
+
+```
+```{r}
+colnames(sept_24)
+
+```
+
+
+```{r}
+colnames(oct_24)
+
+```
+
+```{r}
+colnames(nov_24)
+
+```
+# merging all the data set
+```{r}
+bike_share <- rbind(dec_23, jan_24, feb_24, mar_24, apr_24, may_24, jun_24, jul_24, aug_24, sept_24, oct_24, nov_24)
+```
+
+
+```{r}
+bike_share <- janitor::remove_empty(bike_share,which=c("cols"))
+bike_share <- janitor::remove_empty(bike_share,which = c("rows"))
+```
+
+```{r}
+bike_share$ymd <- as.Date(bike_share$started_at)
+bike_share$started_at <-lubridate::ymd_hms(bike_share$started_at)
+bike_share$ended_at <- lubridate::ymd_hms(bike_share$ended_at)
+```
+
+```{r}
+bike_share$start_hour <- lubridate::hour(bike_share$started_at)
+bike_share$ended_hour <- lubridate::hour(bike_share$ended_at)
+
+```
+
+```{r}
+bike_share$Hours <- difftime(bike_share$ended_at, bike_share$started_at, units=c("hours"))
+bike_share$minutes <- difftime(bike_share$ended_at, bike_share$started_at, units=c("mins"))
+bike_share1 <- bike_share %>% filter(Hours>0) 
+
+```
+```{r}
+bike_share1 <- bike_share %>% filter(Hours>0) %>% drop_na()
+```
+#cleaning reducted the rows from 5906269 to 5898151
+
+#eliminating some of the frames
+
+```{r}
+names(df)
+```
+# Load necessary library
+
+```{r}
+library(lubridate)
+
+```
+
+
+# Check the current format of your data
+
+```{r}
+head(bike_share$started_at)
+head(bike_share$ended_at)
+
+```
+
+# Convert 'started_at' and 'ended_at' columns to POSIXct
+
+```{r}
+bike_share1$started_at <- as.POSIXct(bike_share1$started_at, format = "%y/%m/%d %H:%M", tz = "UTC")
+bike_share1$ended_at <- as.POSIXct(bike_share1$ended_at, format = "%y/%m/%d %H:%M", tz = "UTC")
+```
+
+
+# Extracting started ride date and time
+```{r}
+bike_share1$started_ride_date <- format(bike_share1$started_at, "%Y-%m-%d")
+
+bike_share1$started_ride_time <- format(bike_share1$started_at, "%H:%M:%S")
+```
+
+#Extracting bike ride ended date and time
+
+```{r}
+
+bike_share1$ended_ride_date <- format(bike_share1$ended_at, "%Y-%m-%d")
+
+bike_share1$ended_ride_time <- format(bike_share1$ended_at, "%H:%M:%S")
+```
+
+
+
+# Calculate ride length in seconds
+
+```{r}
+bike_share1$ride_length <- difftime(bike_share1$ended_at, bike_share1$started_at, units = "secs")
+```
+
+# 'start_hour'
+```{r}
+bike_share1$start_hour <- format(as.POSIXct(bike_share1$started_at), "%H")
+```
+
+
+#Extracting date component for 'year', 'month', & 'weekday'
+
+```{r}
+bike_share2 <- bike_share1 %>%
+  mutate(year = lubridate::year(started_at),  
+         month = lubridate::month(started_at, label = TRUE), # month  "abbr"
+         weekday = lubridate::wday(started_at, label = TRUE)) # day of week
+```
+
+
+
+# overview of dataset
+
+```{r}
+
+glimpse(bike_share2) #glimpse of dataset
+```
+```{r}
+
+bike_share_clean <- bike_share2 %>% 
+  select(-ymd, -Hours, -minutes, -ended_hour)
+```
+
+
+```{r}
+
+glimpse(bike_share_clean) #glimpse of dataset
+```
+
+
+
+```{r}
+
+bike_share_clean %>% 
+  select(member_casual, ride_length) %>% 
+  group_by(member_casual) %>%
+  dplyr::summarize(min_ride_length = min(ride_length), max_ride_length = max(ride_length)) %>% 
+  ungroup()
+```
+
+```{r}
+bike_clean1 <- bike_share_clean %>%
+  filter(ride_length >= 60 & ride_length < 86400)
+```
+```{r}
+nrow(bike_clean1) 
+```
+
+# converting 'ride_length' to numeric before analyzing
+```{r}
+is.factor(bike_clean1$ride_length) #FLASE
+```
+
+## [1] FALSE
+```{r}
+bike_clean1$ride_length <- as.numeric(as.character(bike_clean1$ride_length))
+```
+
+```{r}
+is.numeric(bike_clean1$ride_length) #TRUE
+```
+
+
+#ordering by 'started_at' in Ascending order
+```{r cleaned data, echo=TRUE}
+bike_Final_clean <-  arrange(bike_clean1, started_at)
+print(bike_Final_clean)
+```
+# Dataset Overview
+
+```{r date and time shwoing correctly, echo=TRUE}
+bike_Final_clean %>% head(10)
+```
+
+##statistical summary of trip duration
+```{r summary secs, echo=TRUE}
+summary(bike_Final_clean$ride_length)
+```
+```{r minimun and maximum ride, echo=TRUE}
+bike_Final_clean %>% 
+    group_by(member_casual) %>% 
+    summarize(minmum_ride_length = min(ride_length),
+              maximum_ride_length = max(ride_length),
+              average_ride_length = mean(ride_length),
+              median_ride_length = median(ride_length))
+```
+
+#yearly percentage of casual Vs. member rides
+```{r percentage ride, echo=TRUE}
+bike_Final_clean %>% 
+  group_by(member_casual) %>%
+  summarise("numbers of rides" = n(), perc = n()/nrow(bike_Final_clean) *100)
+```
+
+
+#Create data for the graph
+
+```{r x, echo=TRUE}
+x <-  c(3672372, 2093218)
+piepercent <- paste0(round(x/sum(x)*100, 1), "%")
+labels <-  c("member", "casual")
+color <- c("#00BFC4","#F8766D")
+# Plot the chart.
+pie3D(x, labels = piepercent, explode =0.1, radius = 1,
+  main = "Proportion of Total Rides %", col = color)
+  legend(title = "Membership", "topright", c("member", "casual"), 
+  cex = 0.5, fill = color)
+```
+
+
+
+```{r bar chart, echo=TRUE}
+
+bike_Final_clean %>% 
+  group_by(member_casual) %>%
+  ggplot(aes(x=member_casual, fill = member_casual))+
+  labs(title= "Membership Distribution", y= "Number of rides", x="casual vs member", fill="Membership type") +
+  geom_bar(position='dodge')
+```
+#An analysis of the rides frequency over a period of 12 months to gain precise insights that will guide my approach to encourage casual members to transition into full-fledged annual members.
+
+#Calculating rides per start_hour & Average
+```{r Ride Average duration, echo=TRUE}
+
+bike_Final_clean %>%
+  group_by(start_hour, member_casual) %>%
+  summarize(ride_numbers = n(), .groups = 'drop', Average_duration = mean(ride_length))
+
+```
+
+# Visualization of rides at early hours 
+```{r Ride started hour, echo=TRUE}
+ bike_Final_clean%>%
+  group_by(start_hour, member_casual) %>%
+  summarize(ride_numbers = n(), .groups = 'drop', Average_duration = mean(ride_length)) %>% 
+  ggplot(aes(x=start_hour, y=ride_numbers, fill= member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Rides started per hour of the day", x="Hours", y="Number of started rides", fill="Membership")
+
+
+```
+#It is observed that members peak riding hours is in the morning  7:00am and in the evening 5:00pm which could simply mean that they use the bike to commute to and fro work. While ride hours for Causal is in majorly in the afternoon.
+
+#Calculating rides per week 
+
+```{r daily ride, echo=TRUE}
+bike_Final_clean %>%
+  group_by(member_casual, weekday) %>%
+  summarize(Number_Rides = n(),  .groups = 'drop', Average_rides = mean(ride_length)) %>%
+  arrange(weekday)
+```
+
+
+
+# Visualization of rides weekly
+```{r Total Rides weekly, echo=TRUE}
+bike_Final_clean %>%
+  group_by(member_casual, weekday) %>%
+  summarize(Number_Rides = n(),  .groups = 'drop', Average_rides = mean(ride_length)) %>%
+  arrange(weekday) %>%
+  ggplot(aes(x=weekday, y=Number_Rides, fill=member_casual))+
+  geom_col(position='dodge')+
+  labs(title = "Total Rides Weekly: Member Vs. Casual", x="Days", y="Total Ride Numbers", fill="Membership_Type")
+
+```
+#With this output showing total ride numbers, we can say that members its most likely that members uses the bike to go to work as the number of rides are more on weekdays with Wednesday recording the highest number. While casuals uses it more on weekends. 
+
+
+# Visualization of average weekly rides
+```{r Average Rides weekly, echo=TRUE}
+bike_Final_clean %>%
+  group_by(member_casual, weekday) %>%
+  summarize(Number_Rides = n(),  .groups = 'drop', Average_rides = mean(ride_length)) %>%
+  arrange(weekday) %>%
+  ggplot(aes(x=member_casual, y=Average_rides, fill=weekday))+
+  geom_bar(position='Dodge', stat='identity')+
+  labs(title = "Average Rides Weekly: Members Vs. Casual", x="Days", y="Average_rides_length", fill="Weekday")
+```
+#Average ride length shows that Causal riders have a longer ride length all through the week recording highest ride length on weekends, Saturday and Sunday. 
+
+# Calculating rides per month
+# Properly factorize the 'month' column
+
+```{r bike_month, echo=TRUE}
+
+library(dplyr)
+library(lubridate)
+
+# Ensure 'started_at' is in datetime format
+bike_Final_clean$started_at <- as.POSIXct(bike_Final_clean$started_at, format = "%Y-%m-%d %H:%M:%S")
+
+# Extract the month abbreviation in lowercase
+bike_Final_clean$month <- tolower(format(bike_Final_clean$started_at, "%b"))
+
+# Correctly factorize the 'month' column
+bike_Final_clean$month <- factor(bike_Final_clean$month, 
+                                 levels = c("dec", "jan", "feb", "mar", "apr", "may", "jun", 
+                                            "jul", "aug", "sep", "oct", "nov"))
+
+# Group, summarize, and arrange the data
+bike_month <- bike_Final_clean %>%
+  group_by(member_casual, month) %>%
+  summarize(
+    ride_numbers = n(),
+    Average_duration = mean(ride_length, na.rm = TRUE), # Ignore NA values in calculations
+    .groups = 'drop'
+  ) %>%
+  arrange(match(month, levels(bike_Final_clean$month)))
+
+# Display the summary
+print(bike_month)
+```
+
+```{r}
+str(bike_month)
+
+```
+
+
+```{r}
+bike_month <- bike_Final_clean %>%
+  select(member_casual, month, weekday, ride_length) # Include all necessary columns
+```
+
+```{r chart by month, echo=TRUE}
+bike_summary <- bike_month %>%
+  group_by(member_casual, month) %>%
+  summarize(
+    ride_numbers = n(),
+    Average_duration = mean(ride_length, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  arrange(match(month, c("dec", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sept", "oct", "nov")))
+```
+
+```{r bike summary, echo=TRUE}
+print(bike_summary)
+```
+
+
+
+```{r bike summary chart, echo=TRUE}
+
+ggplot(bike_summary, aes(x = month, y = ride_numbers, fill = member_casual)) +
+  geom_col(position = position_dodge(width = 0.5), width = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Monthly Trips: Casual Vs.  Members",
+       x = "Month",
+       y = "Number of Trips",
+       fill = "Membership")
+
+```
+#It is observed that in warmer months (June, July, August, September) there are more rides for both members and casuals. There is a sharp drop in rides for the month of December, January, February which is most likely to be due to winter season.  
+
+
+```{r Average ride length by month, echo=TRUE}
+bike_Final_clean %>%
+  group_by(member_casual, month) %>%
+  summarize(ride_numbers = n(), .groups = 'drop', Average_duration = mean(ride_length)) %>%
+  arrange(month) %>%
+  ggplot(aes(x=month, y=Average_duration, fill= member_casual)) +
+  geom_col(position = 'dodge') +
+  labs(title = "Average ride length by month", x="month", y="Average Ride_length", fill="Membership")
+
+```
+#Members are having an average ride length of <1000 secs throughout the year. While casual riders average ride length is between 750 - 1500 secs throughout the year. But in the month of may and July average ride length is higher.
+
+```{r types of bike, echo=TRUE}
+bike_Final_clean %>% 
+  group_by(member_casual, rideable_type) %>%
+  summarise(total=n(), .groups = 'drop', perc =round(n()/nrow(bike_Final_clean)*100, 1)) %>%
+  arrange(rideable_type)
+
+```
+
+```{r comparing use of diff bikes, echo=TRUE}
+bike_Final_clean %>% 
+  group_by(member_casual, rideable_type) %>%
+  summarise(total=n(), .groups = 'drop', perc =round(n()/nrow(bike_Final_clean)*100, 1)) %>%
+  arrange(rideable_type) %>%
+  ggplot(aes(x=rideable_type, y= total, fill=member_casual))+
+  geom_col(position='dodge')+
+  labs(title = "Preferred Bikes")+ 
+  facet_wrap(~member_casual)+
+  geom_text(aes(label = paste(format(perc, nsmall=1), "%")), vjust= -0.2)
+```
+#Of all the total bike usage, electric bike is the most preferred by both members and causal riders with % of 31.9 and 18.0 respectively. Its also observed that members usage of classic bike is also relatively higher while the use of electric scooter for both members and causal is marginal with 1.0% and 1.4% respectively.
+
+#Share
+
+
+
+#Recommendation
+#Conduct a survey to know why electric scooter is not regularly used by both the members and casuals. From what I know electric scooter moves faster than the rest of the 2 others. 
+#Your findings will help you structure your promotion and advertisment to get the targeted clients.
+
+
+
+
+
+
