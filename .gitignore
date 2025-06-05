@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 # Ignore large divvy trip data Excel files
-R/*divvy-tripdata.xlsx
+R/*divvy-tripdata.csv
+R/*.html
